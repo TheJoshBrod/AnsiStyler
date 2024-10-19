@@ -1,5 +1,7 @@
 #!/bin/bash
 
+############ Constants ############
+
 # Define the high-level options
 options=(
     "Change Foreground Color"
@@ -70,6 +72,9 @@ background_4bit_color_values=(
     "107"
 )
 
+
+############ Globals ############
+
 # Remember State
 bold=0  
 italics=0
@@ -79,6 +84,8 @@ special=""
 background_color=90
 foreground_color=37
 text="This is your selected text!"
+
+############ Helper Functions ############
 
 # List all options (with value)
 display_all(){
@@ -107,12 +114,9 @@ toggle_special(){
 }
 
 
+############ Main Function ############
 
-echo -e "\033[1;3;95m$(figlet "ANSI Generator")\033[0m"
-
-# Loop until user exit
-while true
-do
+menu(){
 
     # Print the options to the user
     echo "Please select an option from the list below:"
@@ -153,18 +157,12 @@ do
             clear
             background_color=${background_4bit_color_values[$((color_index - 1))]}
             echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
-
-
             ;;
         
         # Bold
         3)
             echo -e "You chose to toggle \033[1mbold.\033[0m"
-            if [ "$bold" -eq 1 ]; then
-                bold=0;
-            elif [ "$bold" -eq 0 ]; then
-                bold=1;
-            fi
+            let bold=$bold^1
             special=$(toggle_special)
             echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
@@ -172,11 +170,7 @@ do
         # Italics
         4)
             echo -e "You chose to toggle \033[3mitalics.\033[0m"
-            if [ "$italics" -eq 1 ]; then
-                italics=0;
-            elif [ "$italics" -eq 0 ]; then
-                italics=1;
-            fi
+            let italics=$italics^1
             special=$(toggle_special)
             echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
@@ -184,11 +178,7 @@ do
         # Underline
         5)
             echo -e "\033[4mThis text is Underlined\033[0m"
-            if [ "$underline" -eq 1 ]; then
-                underline=0;
-            elif [ "$underline" -eq 0 ]; then
-                underline=1;
-            fi
+            let underline=$underline^1
             special=$(toggle_special)
             echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
@@ -196,11 +186,7 @@ do
         # Strikethrough
         6)
             echo -e "\033[9mThis text is Strikethrough\033[0m"
-            if [ "$strikethrough" -eq 1 ]; then
-                strikethrough=0;
-            elif [ "$strikethrough" -eq 0 ]; then
-                strikethrough=1;
-            fi
+            let strikethrough=$strikethrough^1
             special=$(toggle_special)
             echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
@@ -234,5 +220,17 @@ do
         exit 0
     fi
     clear
+}
 
-done
+
+
+main(){
+    echo -e "\033[1;3;95m$(figlet "ANSI Generator")\033[0m"
+    # Loop until user exit
+    while true
+    do
+        menu
+    done
+}
+
+main
