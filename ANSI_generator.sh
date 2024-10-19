@@ -83,7 +83,7 @@ strikethrough=0
 special=""
 background_color=90
 foreground_color=37
-text="This is your selected text!"
+raw_text="This is your selected text!"
 
 ############ Helper Functions ############
 
@@ -113,6 +113,24 @@ toggle_special(){
     echo "${special_char}"
 }
 
+# Echo's preview of ANSI output
+preview(){
+    special=$(toggle_special)
+    echo -e "\033[${special}${background_color};${foreground_color}m${raw_text}\033[0m"
+}
+
+# Try Catch to see if input text was a command or just text
+process_text_input(){
+    local input_command="$1"
+    output=$(eval "$input_command" 2>&1)
+    if [ $? -eq 0 ]; then
+        echo "$output"
+    else
+        echo "$input_command"
+    fi
+}
+
+
 
 ############ Main Function ############
 
@@ -139,9 +157,8 @@ menu(){
                 echo "Invalid input. Please enter a valid number."
                 read -p "Enter the number of your choice (1-16): " color_index
             done
-            clear
             foreground_color=${foreground_4bit_color_values[$((color_index - 1))]}
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
+            clear
             ;;
 
         # Background Color
@@ -154,66 +171,59 @@ menu(){
                 echo "Invalid input. Please enter a valid number."
                 read -p "Enter the number of your choice (1-16): " color_index
             done
-            clear
             background_color=${background_4bit_color_values[$((color_index - 1))]}
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
+            clear
             ;;
         
         # Bold
         3)
             echo -e "You chose to toggle \033[1mbold.\033[0m"
             let bold=$bold^1
-            special=$(toggle_special)
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
-        
+
         # Italics
         4)
             echo -e "You chose to toggle \033[3mitalics.\033[0m"
             let italics=$italics^1
-            special=$(toggle_special)
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
-        
+
         # Underline
         5)
             echo -e "\033[4mThis text is Underlined\033[0m"
             let underline=$underline^1
-            special=$(toggle_special)
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
-        
+
         # Strikethrough
         6)
             echo -e "\033[9mThis text is Strikethrough\033[0m"
             let strikethrough=$strikethrough^1
-            special=$(toggle_special)
-            echo -e "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
             ;;
-        
+
         # Text
         7)
-            read -p "Change the text to:  " text
+            read -p "Change the text to:  " raw_text
             ;;
-        
+
         # Print output
         8)
-            echo "\033[${special}${background_color};${foreground_color}m${text}\033[0m"
+            echo "\033[${special}${background_color};${foreground_color}m${raw_text}\033[0m"
             ;;
-        
+
         # Exit
         q)
             echo "Exiting."
             clear
             exit 0
             ;;
-        
+
         # Error checking
         *)
             echo "Invalid option. Please enter a number between 1-6 or 'q' to exit."
             ;;
     esac
-
+    raw_text=$(process_text_input "$raw_text")
+    formatted_text=$(preview)
+    echo -e "$formatted_text"
     # Restart loop
     read -p "Continue? [Y,n]" choice
     if [ "$choice" = "n" ]; then
@@ -222,10 +232,8 @@ menu(){
     clear
 }
 
-
-
 main(){
-    echo -e "\033[1;3;95m$(figlet "ANSI Generator")\033[0m"
+    echo -e "\033[1;95m$(figlet -f slant "ANSI Styler")\033[0m"
     # Loop until user exit
     while true
     do
